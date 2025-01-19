@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-type ShortcutScouting struct {
+type ParallelShortcutScouting struct {
 	labyrinth    [][]uint
 	maxPoint     Point
 	start        Point
@@ -18,7 +18,7 @@ type ShortcutScouting struct {
 	wg           *sync.WaitGroup
 }
 
-func (s *ShortcutScouting) checkNextPoint(p Point, prevPoints map[Point]bool) bool {
+func (s *ParallelShortcutScouting) checkNextPoint(p Point, prevPoints map[Point]bool) bool {
 
 	checkForNeighborhood :=
 		func(p Point, points map[Point]bool) bool {
@@ -41,7 +41,7 @@ func (s *ShortcutScouting) checkNextPoint(p Point, prevPoints map[Point]bool) bo
 
 }
 
-func (s *ShortcutScouting) sendScout(route []Point, prevPoints map[Point]bool, loc Point, distCounter uint, res chan<- []Point, stopSignal chan interface{}) {
+func (s *ParallelShortcutScouting) sendScout(route []Point, prevPoints map[Point]bool, loc Point, distCounter uint, res chan<- []Point, stopSignal chan interface{}) {
 	for loc != s.finish {
 		individualGoalSelected := false
 		upPoint := loc.GoUp(1)
@@ -160,8 +160,8 @@ func (s *ShortcutScouting) sendScout(route []Point, prevPoints map[Point]bool, l
 	res <- route
 }
 
-// Этот метод публикуем
-func (s *ShortcutScouting) Find(start, finish Point) (shortcut []Point, dist uint, err error) {
+// Запускает алгоритм параллельного перебора всех маршрутов от старта до финиша с целью поиска самого короткого пути
+func (s *ParallelShortcutScouting) Find(start, finish Point) (shortcut []Point, dist uint, err error) {
 	s.start = start
 	s.finish = finish
 	res := make(chan []Point)
@@ -190,7 +190,7 @@ func (s *ShortcutScouting) Find(start, finish Point) (shortcut []Point, dist uin
 	return
 }
 
-// Эту функцию публикуем
-func CreateShortcutScouting(labyrinth [][]uint) *ShortcutScouting {
-	return &ShortcutScouting{labyrinth: labyrinth, maxPoint: Point{Y: len(labyrinth) - 1, X: len(labyrinth[0]) - 1}, sdMux: &sync.RWMutex{}, wg: &sync.WaitGroup{}, shortestDist: ^uint(0)}
+// Создаёт объект типа ParallelShortcutScouting и возвращает его под типом интерфейса ShortcutScouting
+func CreateParallelShortcutScouting(labyrinth [][]uint) ShortcutScouting {
+	return &ParallelShortcutScouting{labyrinth: labyrinth, maxPoint: Point{Y: len(labyrinth) - 1, X: len(labyrinth[0]) - 1}, sdMux: &sync.RWMutex{}, wg: &sync.WaitGroup{}, shortestDist: ^uint(0)}
 }

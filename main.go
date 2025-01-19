@@ -8,7 +8,8 @@ import (
 
 func main() {
 	labyrinth, start, finish := lab.Input(os.Stdin)
-	scouting := lab.CreateShortcutScouting(labyrinth)
+	//var scouting lab.ShortcutScouting = lab.CreateParallelShortcutScouting(labyrinth)
+	var scouting lab.ShortcutScouting = lab.CreateDijkstraScouting(labyrinth)
 
 	shortcut, dist, err := scouting.Find(start, finish)
 	if err != nil {
